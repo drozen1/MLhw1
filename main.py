@@ -1,3 +1,4 @@
+
 import csv
 import datetime
 import numpy as np
@@ -10,8 +11,8 @@ import warnings
 warnings.filterwarnings('ignore')
 from sklearn.ensemble import IsolationForest
 import math
-
 import scipy.stats as stats
+
 
 # Press the green button in the gutter to run the script.
 
@@ -102,6 +103,7 @@ def remove_outliers(dataset,dataset_type):
 if __name__ == '__main__':
 
     dataset=pd.read_csv('virus_hw1.csv')
+
     #count_nans(dataset.PCR_11)
     dataset.DateOfPCRTest=dataset.DateOfPCRTest.astype("datetime64")
     dataset=dataset.drop(['ID'], axis=1)

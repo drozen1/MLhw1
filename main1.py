@@ -5,8 +5,24 @@ import seaborn as sns
 import csv
 from sklearn.model_selection import train_test_split
 import warnings
+import scipy.stats as stats
 
 warnings.filterwarnings('ignore')
+
+
+def remove_outliers(data, columns):
+    all_indexes=[]
+    x = np.zeros(data.shape[0], dtype=bool)
+    for i in (range(len(columns))):
+        if( isinstance(data[columns[i]][0], str) ):
+            pass
+        else:
+            if(columns[i] != "DateOfPCRTest"):
+                npdata = np.asarray(data[columns[i]])
+                b = stats.zscore(npdata)
+                x = ((np.absolute(b) >= 3) | x)
+    afterDrop = data[(x == False)]
+    return afterDrop
 
 
 # function for replacing missing data in train and for turning everything into numeric data
@@ -19,7 +35,7 @@ def replace_to_mean(data):
     elif tp == "float64":
         new_data = data.fillna(data.mean())
     else:
-        new_data = data
+        new_data = data.fillna(data.mode()[0])
         # numeric_temp = range(len(temp))
 
         # for i in range(len(data)):
@@ -110,11 +126,15 @@ if __name__ == '__main__':
         if columns[i] == 'DateOfPCRTest':
             DateOfBase = train.DateOfPCRTest
             minDate = DateOfBase.min()
-            avg_date = (minDate + (DateOfBase-minDate).man().to_pydatetime())
-            train.DateOfPCR = train.DateOfPCR.fillna(avg_date)
+            avg_date = (minDate + (DateOfBase - minDate).mean())
+            train.DateOfPCRTest = train.DateOfPCRTest.fillna(avg_date)
 
         else:
             train[columns[i]] = replace_to_mean(train[columns[i]])
+
+    # outliers
+    train = remove_outliers(train, columns)
+
 
     # All plots required for this assignment were made here:
     # BMI histogram
