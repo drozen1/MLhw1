@@ -76,6 +76,7 @@ if __name__ == '__main__':
     # Part 1.1 - importing the data
     filename = 'virus_hw1.csv'
     dataset = pd.read_csv(filename)
+    datasetCopy = dataset.copy()
 
     # Part 1.3: changing to the correct type
     # Before changing, we'd like to see the data in graphs for quick and efficient decisions
@@ -135,6 +136,10 @@ if __name__ == '__main__':
     # outliers
     train = remove_outliers(train, columns)
 
+    sns.histplot(train.BMI, bins=100, kde=True)
+    plt.grid()
+    plt.savefig('train_BMI_histogram.png')
+    plt.close()
 
     # All plots required for this assignment were made here:
     # BMI histogram
@@ -144,8 +149,8 @@ if __name__ == '__main__':
     plt.close()
 
     # Blood type bins:
-    temp.Virus[(temp.Virus != 'covid') & (temp.Virus != 'not_detected')] = 'other'
-    BloodType_plot = pd.crosstab([temp.BloodType], temp.Virus)
+    datasetCopy.Virus[(datasetCopy.Virus != 'covid') & (datasetCopy.Virus != 'not_detected')] = 'other'
+    BloodType_plot = pd.crosstab([datasetCopy.BloodType], datasetCopy.Virus)
     BloodType_plot.plot(kind='bar', stacked=True, color=['red', 'blue', 'green'], grid=True)
     plt.grid()
     plt.savefig('Bloodtype_histogram.png')
