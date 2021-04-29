@@ -20,6 +20,7 @@ def remove_outliers(data, columns):
             if(columns[i] != "DateOfPCRTest"):
                 npdata = np.asarray(data[columns[i]])
                 b = stats.zscore(npdata)
+                data[columns[i]]=b #remove this line for generating graphs
                 x = ((np.absolute(b) >= 3) | x)
     afterDrop = data[(x == False)]
     return afterDrop
@@ -73,6 +74,7 @@ def NAN_checker(data):
 
 if __name__ == '__main__':
 
+    #
     # Part 1.1 - importing the data
     filename = 'virus_hw1.csv'
     dataset = pd.read_csv(filename)
@@ -82,7 +84,7 @@ if __name__ == '__main__':
     # Before changing, we'd like to see the data in graphs for quick and efficient decisions
 
     # TODO write all types in the table and explanations why add split function
-    print(dataset.info())  # to properly evaluate the types we'd like to see the data information
+    #print(dataset.info())  # to properly evaluate the types we'd like to see the data information
     dataset.Address = dataset.Address.astype('string')
     # dataset.AgeGroup = dataset.AgeGroup.astype('category')
     dataset.BloodType = dataset.BloodType.astype('category')
@@ -135,6 +137,22 @@ if __name__ == '__main__':
 
     # outliers
     train = remove_outliers(train, columns)
+    print(train.info())
+
+    #Part 13:
+
+    # all corralations matrix
+    corrMatrix = train.corr()
+    sns.heatmap(corrMatrix,xticklabels=True,yticklabels=True, annot=True)
+    plt.show()
+
+ # testing two features . checking if we can drop one of them
+    g = sns.jointplot(data=train, x="ConversatiosPerDay" , y="HappinessScore",hue="Virus")
+    plt.show()
+
+
+
+    #graphs:
 
     sns.histplot(train.BMI, bins=100, kde=True)
     plt.grid()
