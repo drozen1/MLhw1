@@ -4,23 +4,27 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import csv
 from sklearn.model_selection import train_test_split
+from sklearn.tree import plot_tree, DecisionTreeClassifier
 import warnings
 import scipy.stats as stats
 
 warnings.filterwarnings('ignore')
-
+#
+# g = sns.jointplot(data=df, x="x1"
+# , y="x2")
+# g.ax_joint.grid()
 
 def remove_outliers(data, columns):
-    all_indexes=[]
+    all_indexes = []
     x = np.zeros(data.shape[0], dtype=bool)
     for i in (range(len(columns))):
-        if( isinstance(data[columns[i]][0], str) ):
+        if (isinstance(data[columns[i]][0], str)):
             pass
         else:
-            if(columns[i] != "DateOfPCRTest"):
+            if (columns[i] != "DateOfPCRTest"):
                 npdata = np.asarray(data[columns[i]])
                 b = stats.zscore(npdata)
-                data[columns[i]]=b #remove this line for generating graphs
+                data[columns[i]] = b  # remove this line for generating graphs
                 x = ((np.absolute(b) >= 3) | x)
     afterDrop = data[(x == False)]
     return afterDrop
@@ -84,7 +88,7 @@ if __name__ == '__main__':
     # Before changing, we'd like to see the data in graphs for quick and efficient decisions
 
     # TODO write all types in the table and explanations why add split function
-    #print(dataset.info())  # to properly evaluate the types we'd like to see the data information
+    # print(dataset.info())  # to properly evaluate the types we'd like to see the data information
     dataset.Address = dataset.Address.astype('string')
     # dataset.AgeGroup = dataset.AgeGroup.astype('category')
     dataset.BloodType = dataset.BloodType.astype('category')
@@ -121,6 +125,41 @@ if __name__ == '__main__':
     NAN_checker(train)
     train = train.drop(['PCR_11', 'PCR_15'], axis=1)
 
+    # This is for part 13, we'd like to see plots before filling missing data. Explanations is in the attached file.
+    # plt.rc('xtick', labelsize=20)
+    # plt.rc('ytick', labelsize=20)
+    # g1 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HappinessScore", hue="Virus")
+    # plt.show()
+
+    # g2 = sns.jointplot(data=train, x="AgeGroup", y="NrCousins", hue="Virus")
+    # plt.savefig('agegroupVScousins.jpg', bbox_inches='tight')
+    #
+    # g3 = sns.jointplot(data=train, x="AgeGroup", y="StepsPerYear", hue="Virus")
+    # plt.savefig('agegroupVSsteps.jpg', bbox_inches='tight')
+    #
+    # g4 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HouseholdExpenseOnPresents", hue="Virus")
+    # plt.show()
+    #
+    # g5 = sns.jointplot(data=train, x="HappinessScore", y="HouseholdExpenseOnPresents", hue="Virus")
+    # plt.show()
+    #
+    # g6 = sns.jointplot(data=train, x="DisciplineScore", y="MedicalCarePerYear", hue="Virus")
+    # plt.show()
+    #
+    # g7 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
+    # plt.show()
+    #
+    # g8 = sns.jointplot(data=train, x="SportsPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
+    # plt.show()
+    #
+    # g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
+    # # plt.savefig('Socialvssports_noOutliers.jpg', bbox_inches='tight')
+    # plt.show()
+    #
+    # g10_1 = sns.jointplot(data=train, x="StudingPerDay", y="HouseholdExpenseParkingTicketsPerYear")
+    # plt.savefig('ticketsVSstudying_noOutliers.jpg', bbox_inches='tight')
+    # # plt.show()
+
     # Part 2.8: Discussion in attached file
     # First, we'd like to change the data into numeric data for easier handling and later modelling.
     columns = list(train)
@@ -139,37 +178,79 @@ if __name__ == '__main__':
     train = remove_outliers(train, columns)
     print(train.info())
 
-    #Part 13:
+    # Part 13:
 
     # all corralations matrix
-    corrMatrix = train.corr()
-    sns.heatmap(corrMatrix,xticklabels=True,yticklabels=True, annot=True)
+    # plt.rc('xtick', labelsize=20)
+    # plt.rc('ytick', labelsize=20)
+    # corrMatrix = train.corr()
+    # plt.figure(figsize=(20, 20))
+    # ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
+    # plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+    #          rotation_mode="anchor")
+    # # plt.show()
+    # plt.savefig('correlation_matrix.jpg', bbox_inches='tight')
+
+    # # testing two features . checking if we can drop one of them
+    # g1 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HappinessScore", hue="Virus")
+    # plt.show()
+    #
+    # g2 = sns.jointplot(data=train, x="AgeGroup", y="NrCousins", hue="Virus")
+    # plt.savefig('agegroupVScousins.jpg', bbox_inches='tight')
+    #
+    # g3 = sns.jointplot(data=train, x="AgeGroup", y="StepsPerYear", hue="Virus")
+    # plt.savefig('agegroupVSsteps.jpg', bbox_inches='tight')
+
+    # g4 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HouseholdExpenseOnPresents", hue="Virus")
+    # plt.show()
+    #
+    # g5 = sns.jointplot(data=train, x="HappinessScore", y="HouseholdExpenseOnPresents", hue="Virus")
+    # plt.show()
+    #
+    # g6 = sns.jointplot(data=train, x="DisciplineScore", y="MedicalCarePerYear", hue="Virus")
+    # plt.show()
+    #
+    # g7 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
+    # plt.show()
+    #
+    # g8 = sns.jointplot(data=train, x="SportsPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
+    # plt.show()
+    #
+    # g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
+    # plt.show()
+    #
+    # g10_2 = sns.jointplot(data=train, x="StudingPerDay", y="HouseholdExpenseParkingTicketsPerYear")
+    # plt.savefig('ticketsVSstudying.jpg', bbox_inches='tight')
+    # plt.close()
+
+    X_train = train.iloc[:, [0, 33]]
+    Y_train = train.Virus
+    h = DecisionTreeClassifier(criterion="entropy")
+    h.fit(X_train, Y_train)
+    plt.figure(figsize=(20, 20))
+    plot_tree(h, filled=True)
     plt.show()
 
- # testing two features . checking if we can drop one of them
-    g = sns.jointplot(data=train, x="ConversatiosPerDay" , y="HappinessScore",hue="Virus")
-    plt.show()
-
-
-
-    #graphs:
-
-    sns.histplot(train.BMI, bins=100, kde=True)
-    plt.grid()
-    plt.savefig('train_BMI_histogram.png')
-    plt.close()
-
-    # All plots required for this assignment were made here:
-    # BMI histogram
-    sns.histplot(dataset.BMI, bins=100, kde=True)
-    plt.grid()
-    plt.savefig('BMI_histogram.png')
-    plt.close()
-
-    # Blood type bins:
-    datasetCopy.Virus[(datasetCopy.Virus != 'covid') & (datasetCopy.Virus != 'not_detected')] = 'other'
-    BloodType_plot = pd.crosstab([datasetCopy.BloodType], datasetCopy.Virus)
-    BloodType_plot.plot(kind='bar', stacked=True, color=['red', 'blue', 'green'], grid=True)
-    plt.grid()
-    plt.savefig('Bloodtype_histogram.png')
-    plt.close()
+    # plt.show()
+    #
+    # # graphs:
+    #
+    # sns.histplot(train.BMI, bins=100, kde=True)
+    # plt.grid()
+    # plt.savefig('train_BMI_histogram.png')
+    # plt.close()
+    #
+    # # All plots required for this assignment were made here:
+    # # BMI histogram
+    # sns.histplot(dataset.BMI, bins=100, kde=True)
+    # plt.grid()
+    # plt.savefig('BMI_histogram.png')
+    # plt.close()
+    #
+    # # Blood type bins:
+    # datasetCopy.Virus[(datasetCopy.Virus != 'covid') & (datasetCopy.Virus != 'not_detected')] = 'other'
+    # BloodType_plot = pd.crosstab([datasetCopy.BloodType], datasetCopy.Virus)
+    # BloodType_plot.plot(kind='bar', stacked=True, color=['red', 'blue', 'green'], grid=True)
+    # plt.grid()
+    # plt.savefig('Bloodtype_histogram.png')
+    # plt.close()
