@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,36 +17,26 @@ def convertToNumerical(train):
     bloodTypes = pd.Series(train.BloodType).unique()
     count = 0
     for i in bloodTypes:
-        train.BloodType.replace(to_replace=i, value=count, inplace=True)
+        train.BloodType.replace(to_replace=i, value=float(count), inplace=True)
         count += 1
-    train.Sex.replace(to_replace="F", value=1, inplace=True)
-    train.Sex.replace(to_replace="M", value=0, inplace=True)
-
+    train.Sex.replace(to_replace="F", value=float(1), inplace=True)
+    train.Sex.replace(to_replace="M", value=float(0), inplace=True)
     viruses = pd.Series(train.Virus).unique()
     count = 0
     for i in viruses:
-        train.Virus.replace(to_replace=i, value=count, inplace=True)
+        train.Virus.replace(to_replace=i, value=float(count), inplace=True)
         count += 1
     risks = pd.Series(train.Risk).unique()
     count = 0
     for i in risks:
-        train.Risk.replace(to_replace=i, value=count, inplace=True)
+        train.Risk.replace(to_replace=i, value=float(count), inplace=True)
         count += 1
     spreadLevels = pd.Series(train.SpreadLevel).unique()
     count = 0
     for i in spreadLevels:
-        train.SpreadLevel.replace(to_replace=i, value=count, inplace=True)
+        train.SpreadLevel.replace(to_replace=i, value=float(count), inplace=True)
         count += 1
-
-    # print(train.info())
-    # train.Sex = train.Sex.astype('float64')
-    # print(train.info())
-    # train.Sex = train.Sex.astype('float64')
-    # print(dataset.info())
-    # pd.to_numeric(train.Sex, errors='coerce')
-    # print(dataset.info())
-    # train.Sex = train.Sex.astype('int64')
-    # train.BloodType = dataset.BloodType.astype('category')
+    return train
 
 
 def remove_outliers(data, columns):
@@ -54,9 +46,8 @@ def remove_outliers(data, columns):
         if isinstance(data[columns[i]][0], str):
             pass
         else:
-            if (columns[i] != "DateOfPCRTest"):
-                npdata = np.asarray(data[columns[i]])
-                b = stats.zscore(npdata)
+            npdata = np.asarray(data[columns[i]])
+            b = stats.zscore(npdata)
                 # if columns[i]=='BMI':
                 #     plt.figure(figsize=(20, 20))
                 #     BMI_boxplot = pd.DataFrame(b, columns=['BMI'])
@@ -64,8 +55,8 @@ def remove_outliers(data, columns):
                 #     plt.title('BMI Box Plot after z-score Transformation')
                 #     plt.savefig('BMI_boxplot2.jpg', bbox_inches='tight')
                 #     plt.close()
-                data[columns[i]] = b  # remove this line for generating graphs
-                x = ((np.absolute(b) >= 3) | x)
+            data[columns[i]] = b  # remove this line for generating graphs
+            x = ((np.absolute(b) >= 3) | x)
     afterDrop = data[(x == False)]
 
     # plt.figure(figsize=(20, 20))
@@ -88,12 +79,6 @@ def replace_to_mean(data):
         new_data = data.fillna(data.mean())
     else:
         new_data = data.fillna(data.mode()[0])
-        # numeric_temp = range(len(temp))
-
-        # for i in range(len(data)):
-        #     if data[i].isnull() == False:
-        #         new_data[i] = numeric_temp[temp == data[i]]
-        #     new_data = new_data.fillna(new_data.mean())
     return new_data
 
 
@@ -134,11 +119,12 @@ if __name__ == '__main__':
     # Before changing, we'd like to see the data in graphs for quick and efficient decisions
 
     # TODO write all types in the table and explanations why add split function
-    print(dataset.info())  # to properly evaluate the types we'd like to see the data information
+    #print(dataset.info())  # to properly evaluate the types we'd like to see the data information
     dataset.Address = dataset.Address.astype('string')
     # dataset.AgeGroup = dataset.AgeGroup.astype('category')
     # dataset.BloodType = dataset.BloodType.astype('category')
     dataset.DateOfPCRTest = dataset.DateOfPCRTest.astype('datetime64')
+
     dataset.Job = dataset.Job.astype('string')
     # dataset.NrCousins = dataset.NrCousins.astype('category')
     # dataset.Sex = dataset.Sex.astype('category')
@@ -243,7 +229,12 @@ if __name__ == '__main__':
             minDate = DateOfBase.min()
             avg_date = (minDate + (DateOfBase - minDate).mean())
             train.DateOfPCRTest = train.DateOfPCRTest.fillna(avg_date)
-
+            x= minDate- minDate
+            for i in train.DateOfPCRTest:
+                train.DateOfPCRTest.replace(to_replace=i, value=(i-minDate).days, inplace=True)
+            npdata = np.asarray(train.DateOfPCRTest)
+            b = stats.zscore(npdata)
+            train.DateOfPCRTest= b
         else:
             train[col[i]] = replace_to_mean(train[col[i]])
 
@@ -258,9 +249,9 @@ if __name__ == '__main__':
     # Part 2.10
 
     train = remove_outliers(train, col)
-    print(train.info())
+    #print(train.info())
 
-    # train= convertToNumerical(train)
+
 
     # Part 13:
 
@@ -312,16 +303,20 @@ if __name__ == '__main__':
     plt.close()
     # plt.show()
 
-    # X_train = train.iloc[:,[0, 33]]
-    # Y_train = train.Virus
-    # h = DecisionTreeClassifier(criterion="entropy", max_depth=5)
-    # h.fit(X_train, Y_train)
-    # # plt.figure(figsize=(6, 6))
-    # # plot_tree(h, filled=True)
-    # fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), dpi=130)
+    train = train.drop(['Self_declaration_of_Illness_Form'], axis=1) #TODO: remove this line
+    train = convertToNumerical(train)
+   # print(train.info())
+    indexes = list(range(0, 33))
+    X_train = train.iloc[:,indexes]
+    Y_train = train.Virus
+    h = DecisionTreeClassifier(criterion="entropy", max_depth=3)
+    h.fit(X_train, Y_train)
+    # plt.figure(figsize=(6, 6))
     # plot_tree(h, filled=True)
-    #
-    # plt.show()
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), dpi=130)
+    plot_tree(h, filled=True)
+
+    plt.show()
 
     # # All plots required for this assignment were made here:
     # # BMI histogram
