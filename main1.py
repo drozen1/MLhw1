@@ -9,20 +9,16 @@ import warnings
 import scipy.stats as stats
 
 warnings.filterwarnings('ignore')
-#
-# g = sns.jointplot(data=df, x="x1"
-# , y="x2")
-# g.ax_joint.grid()
 
 
 def convertToNumerical(train):
     bloodTypes = pd.Series(train.BloodType).unique()
-    count=0
+    count = 0
     for i in bloodTypes:
         train.BloodType.replace(to_replace=i, value=count, inplace=True)
-        count+=1
-    train.Sex.replace(to_replace= "F", value= 1,inplace =True)
-    train.Sex.replace(to_replace= "M", value= 0,inplace =True)
+        count += 1
+    train.Sex.replace(to_replace="F", value=1, inplace=True)
+    train.Sex.replace(to_replace="M", value=0, inplace=True)
 
     viruses = pd.Series(train.Virus).unique()
     count = 0
@@ -40,8 +36,6 @@ def convertToNumerical(train):
         train.SpreadLevel.replace(to_replace=i, value=count, inplace=True)
         count += 1
 
-
-
     # print(train.info())
     # train.Sex = train.Sex.astype('float64')
     # print(train.info())
@@ -57,15 +51,29 @@ def remove_outliers(data, columns):
     all_indexes = []
     x = np.zeros(data.shape[0], dtype=bool)
     for i in (range(len(columns))):
-        if (isinstance(data[columns[i]][0], str)):
+        if isinstance(data[columns[i]][0], str):
             pass
         else:
             if (columns[i] != "DateOfPCRTest"):
                 npdata = np.asarray(data[columns[i]])
                 b = stats.zscore(npdata)
+                # if columns[i]=='BMI':
+                #     plt.figure(figsize=(20, 20))
+                #     BMI_boxplot = pd.DataFrame(b, columns=['BMI'])
+                #     BMI_boxplot.plot.box(grid='True')
+                #     plt.title('BMI Box Plot after z-score Transformation')
+                #     plt.savefig('BMI_boxplot2.jpg', bbox_inches='tight')
+                #     plt.close()
                 data[columns[i]] = b  # remove this line for generating graphs
                 x = ((np.absolute(b) >= 3) | x)
     afterDrop = data[(x == False)]
+
+    # plt.figure(figsize=(20, 20))
+    # BMI_boxplot2 = pd.DataFrame(afterDrop.BMI, columns=['BMI'])
+    # BMI_boxplot2.plot.box(grid='True')
+    # plt.title('BMI Box Plot after z-score Transformation and Outliers Removal')
+    # plt.savefig('BMI_boxplot3.jpg', bbox_inches='tight')
+    # plt.close()
     return afterDrop
 
 
@@ -117,7 +125,6 @@ def NAN_checker(data):
 
 if __name__ == '__main__':
 
-    #
     # Part 1.1 - importing the data
     filename = 'virus_hw1.csv'
     dataset = pd.read_csv(filename)
@@ -130,14 +137,14 @@ if __name__ == '__main__':
     print(dataset.info())  # to properly evaluate the types we'd like to see the data information
     dataset.Address = dataset.Address.astype('string')
     # dataset.AgeGroup = dataset.AgeGroup.astype('category')
-    #dataset.BloodType = dataset.BloodType.astype('category')
+    # dataset.BloodType = dataset.BloodType.astype('category')
     dataset.DateOfPCRTest = dataset.DateOfPCRTest.astype('datetime64')
     dataset.Job = dataset.Job.astype('string')
     # dataset.NrCousins = dataset.NrCousins.astype('category')
-   # dataset.Sex = dataset.Sex.astype('category')
-   #  dataset.Virus = dataset.Virus.astype('category')
-   #  dataset.Risk = dataset.Risk.astype('category')
-   #  dataset.SpreadLevel = dataset.SpreadLevel.astype('category')
+    # dataset.Sex = dataset.Sex.astype('category')
+    #  dataset.Virus = dataset.Virus.astype('category')
+    #  dataset.Risk = dataset.Risk.astype('category')
+    #  dataset.SpreadLevel = dataset.SpreadLevel.astype('category')
 
     # Part 2.4: splitting. As splitting is into 2 sets, we split into 3 in two steps: 60/40 and then 50/50 for the 40
     train, test_temp = train_test_split(dataset, test_size=0.4, random_state=14)
@@ -164,61 +171,96 @@ if __name__ == '__main__':
     NAN_checker(train)
     train = train.drop(['PCR_11', 'PCR_15'], axis=1)
 
-    # This is for part 13, we'd like to see plots before filling missing data. Explanations is in the attached file.
-    # plt.rc('xtick', labelsize=20)
-    # plt.rc('ytick', labelsize=20)
+    # # This is for part 13, we'd like to see plots before filling missing data. Explanations is in the attached file.
+    # # plt.rc('xtick', labelsize=20)
+    # # plt.rc('ytick', labelsize=20)
     # g1 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HappinessScore", hue="Virus")
+    # g1.ax_joint.grid()
+    # plt.suptitle('HappinessScore vs. Conversations Per Day')
     # plt.show()
-
+    #
     # g2 = sns.jointplot(data=train, x="AgeGroup", y="NrCousins", hue="Virus")
+    # g2.ax_joint.grid()
+    # g2.fig.tight_layout()
+    # g2.fig.subplots_adjust(top=0.95)  # Reduce plot to make room
+    # plt.suptitle('Nr. of cousins vs. Age Group')
     # plt.savefig('agegroupVScousins.jpg', bbox_inches='tight')
     #
     # g3 = sns.jointplot(data=train, x="AgeGroup", y="StepsPerYear", hue="Virus")
+    # g3.ax_joint.grid()
+    # g3.fig.tight_layout()
+    # g3.fig.subplots_adjust(top=0.95)  # Reduce plot to make room
+    # plt.suptitle('Steps Per Year vs. Age Group')
     # plt.savefig('agegroupVSsteps.jpg', bbox_inches='tight')
     #
     # g4 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HouseholdExpenseOnPresents", hue="Virus")
+    # g4.ax_joint.grid()
     # plt.show()
     #
     # g5 = sns.jointplot(data=train, x="HappinessScore", y="HouseholdExpenseOnPresents", hue="Virus")
+    # g5.ax_joint.grid()
     # plt.show()
     #
     # g6 = sns.jointplot(data=train, x="DisciplineScore", y="MedicalCarePerYear", hue="Virus")
+    # g6.ax_joint.grid()
     # plt.show()
     #
     # g7 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
+    # g7.ax_joint.grid()
     # plt.show()
     #
     # g8 = sns.jointplot(data=train, x="SportsPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
+    # g8.ax_joint.grid()
     # plt.show()
     #
     # g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
+    # g9.ax_joint.grid()
     # # plt.savefig('Socialvssports_noOutliers.jpg', bbox_inches='tight')
     # plt.show()
     #
     # g10_1 = sns.jointplot(data=train, x="StudingPerDay", y="HouseholdExpenseParkingTicketsPerYear")
+    # g10_1.ax_joint.grid()
+    # g10_1.fig.tight_layout()
+    # g10_1.fig.subplots_adjust(top=0.92)  # Reduce plot to make room
+    # plt.suptitle('Household Expense on Parking Tickets Per Year vs. Studying Per Day \n No Imputation')
     # plt.savefig('ticketsVSstudying_noOutliers.jpg', bbox_inches='tight')
+    # plt.close()
     # # plt.show()
+
+    # sns.histplot(train.MedicalCarePerYear, bins=100, kde=True)
+    # plt.grid()
+    # plt.suptitle('Medical Care Per Year Distribution')
+    # plt.savefig('MedicalCare_histogram.png', bbox_inches='tight')
+    # plt.close()
 
     # Part 2.8: Discussion in attached file
     # First, we'd like to change the data into numeric data for easier handling and later modelling.
-    columns = list(train)
+    col = list(train)
 
-    for i in (range(len(columns))):
-        if columns[i] == 'DateOfPCRTest':
+    for i in (range(len(col))):
+        if col[i] == 'DateOfPCRTest':
             DateOfBase = train.DateOfPCRTest
             minDate = DateOfBase.min()
             avg_date = (minDate + (DateOfBase - minDate).mean())
             train.DateOfPCRTest = train.DateOfPCRTest.fillna(avg_date)
 
         else:
-            train[columns[i]] = replace_to_mean(train[columns[i]])
+            train[col[i]] = replace_to_mean(train[col[i]])
 
-    # outliers
-    train = remove_outliers(train, columns)
+    # Part 2.9
+
+    plt.figure(figsize=(20, 20))
+    BMI_boxplot = pd.DataFrame(train.BMI, columns=['BMI'])
+    BMI_boxplot.plot.box(grid='True')
+    plt.title('BMI Box Plot')
+    plt.savefig('BMI_boxplot.jpg', bbox_inches='tight')
+
+    # Part 2.10
+
+    train = remove_outliers(train, col)
     print(train.info())
 
-    train= convertToNumerical(train)
-
+    # train= convertToNumerical(train)
 
     # Part 13:
 
@@ -261,9 +303,14 @@ if __name__ == '__main__':
     # g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
     # plt.show()
     #
-    # g10_2 = sns.jointplot(data=train, x="StudingPerDay", y="HouseholdExpenseParkingTicketsPerYear")
-    # plt.savefig('ticketsVSstudying.jpg', bbox_inches='tight')
-    # plt.close()
+    g10_2 = sns.jointplot(data=train, x="StudingPerDay", y="HouseholdExpenseParkingTicketsPerYear")
+    g10_2.ax_joint.grid()
+    g10_2.fig.tight_layout()
+    g10_2.fig.subplots_adjust(top=0.92)  # Reduce plot to make room
+    plt.suptitle('Household Expense on Parking Tickets Per Year vs. Studying Per Day \n After Imputation')
+    plt.savefig('ticketsVSstudying.jpg', bbox_inches='tight')
+    plt.close()
+    # plt.show()
 
     # X_train = train.iloc[:,[0, 33]]
     # Y_train = train.Virus
@@ -276,18 +323,9 @@ if __name__ == '__main__':
     #
     # plt.show()
 
-    # plt.show()
-    #
-    # # graphs:
-    #
-    # sns.histplot(train.BMI, bins=100, kde=True)
-    # plt.grid()
-    # plt.savefig('train_BMI_histogram.png')
-    # plt.close()
-    #
     # # All plots required for this assignment were made here:
     # # BMI histogram
-    # sns.histplot(dataset.BMI, bins=100, kde=True)
+    # sns.histplot(train.BMI, bins=100, kde=True)
     # plt.grid()
     # plt.savefig('BMI_histogram.png')
     # plt.close()
