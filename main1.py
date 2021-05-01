@@ -139,7 +139,13 @@ if __name__ == '__main__':
     # Part 2.5: already done in Part 1.3
 
     # Part 2.6: discussion is in the attached file
-    train.X, train.Y = split_in_XY(train.CurrentLocation)
+
+    x_orig, y_orig = split_in_XY(train.CurrentLocation)
+    X = x_orig.copy()
+    Y = y_orig.copy()
+    train['X'] = X
+    train['Y'] = Y
+
     train.Virus = train.Virus.astype('object')
     train.Virus[(train.Virus == 'covid')] = '1'
     train.Virus[(train.Virus != '1')] = '0'
@@ -199,6 +205,7 @@ if __name__ == '__main__':
     # g8.ax_joint.grid()
     # plt.show()
     #
+
     # g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
     # g9.ax_joint.grid()
     # # plt.savefig('Socialvssports_noOutliers.jpg', bbox_inches='tight')
@@ -223,13 +230,13 @@ if __name__ == '__main__':
     # First, we'd like to change the data into numeric data for easier handling and later modelling.
     col = list(train)
 
+
     for i in (range(len(col))):
         if col[i] == 'DateOfPCRTest':
             DateOfBase = train.DateOfPCRTest
             minDate = DateOfBase.min()
             avg_date = (minDate + (DateOfBase - minDate).mean())
             train.DateOfPCRTest = train.DateOfPCRTest.fillna(avg_date)
-            x= minDate- minDate
             for i in train.DateOfPCRTest:
                 train.DateOfPCRTest.replace(to_replace=i, value=(i-minDate).days, inplace=True)
             npdata = np.asarray(train.DateOfPCRTest)
@@ -246,6 +253,8 @@ if __name__ == '__main__':
     plt.title('BMI Box Plot')
     plt.savefig('BMI_boxplot.jpg', bbox_inches='tight')
 
+
+
     # Part 2.10
 
     train = remove_outliers(train, col)
@@ -256,17 +265,19 @@ if __name__ == '__main__':
     # Part 13:
 
     # all corralations matrix
-    # plt.rc('xtick', labelsize=20)
-    # plt.rc('ytick', labelsize=20)
-    # corrMatrix = train.corr()
-    # plt.figure(figsize=(20, 20))
-    # ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
-    # plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-    #          rotation_mode="anchor")
-    # # plt.show()
-    # plt.savefig('correlation_matrix.jpg', bbox_inches='tight')
+    """""
+    plt.rc('xtick', labelsize=20)
+    plt.rc('ytick', labelsize=20)
+    corrMatrix = train.corr()
+    plt.figure(figsize=(20, 20))
+    ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+    plt.show()
+    plt.savefig('correlation_matrix.jpg', bbox_inches='tight')
+    """""
 
-    # # testing two features . checking if we can drop one of them
+    # testing two features . checking if we can drop one of them
     # g1 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HappinessScore", hue="Virus")
     # plt.show()
     #
@@ -275,7 +286,7 @@ if __name__ == '__main__':
     #
     # g3 = sns.jointplot(data=train, x="AgeGroup", y="StepsPerYear", hue="Virus")
     # plt.savefig('agegroupVSsteps.jpg', bbox_inches='tight')
-
+    #
     # g4 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HouseholdExpenseOnPresents", hue="Virus")
     # plt.show()
     #
@@ -287,13 +298,13 @@ if __name__ == '__main__':
     #
     # g7 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
     # plt.show()
-    #
+
     # g8 = sns.jointplot(data=train, x="SportsPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
     # plt.show()
-    #
-    # g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
-    # plt.show()
-    #
+
+    g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
+    plt.show()
+
     g10_2 = sns.jointplot(data=train, x="StudingPerDay", y="HouseholdExpenseParkingTicketsPerYear")
     g10_2.ax_joint.grid()
     g10_2.fig.tight_layout()
@@ -305,18 +316,46 @@ if __name__ == '__main__':
 
     train = train.drop(['Self_declaration_of_Illness_Form'], axis=1) #TODO: remove this line
     train = convertToNumerical(train)
-   # print(train.info())
+    print(train.info())
     indexes = list(range(0, 33))
+    indexes.append(36)
+    indexes.append(37)
+
+    """"" ID3 for Virus target label
     X_train = train.iloc[:,indexes]
     Y_train = train.Virus
-    h = DecisionTreeClassifier(criterion="entropy", max_depth=3)
+    h = DecisionTreeClassifier(criterion="entropy", max_depth=15)
     h.fit(X_train, Y_train)
     # plt.figure(figsize=(6, 6))
     # plot_tree(h, filled=True)
     fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), dpi=130)
     plot_tree(h, filled=True)
-
     plt.show()
+    """""
+    #
+    """"" ID3 for SpreadLevel target label
+    X_train = train.iloc[:,indexes]
+    Y_train = train.SpreadLevel
+    h = DecisionTreeClassifier(criterion="entropy", max_depth=15)
+    h.fit(X_train, Y_train)
+    # plt.figure(figsize=(6, 6))
+    # plot_tree(h, filled=True)
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), dpi=130)
+    plot_tree(h, filled=True)
+    plt.show()
+ """""
+
+    """"" ID3 for Risk target label
+    X_train = train.iloc[:,indexes]
+    Y_train = train.Risk
+    h = DecisionTreeClassifier(criterion="entropy", max_depth=15)
+    h.fit(X_train, Y_train)
+    # plt.figure(figsize=(6, 6))
+    # plot_tree(h, filled=True)
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), dpi=130)
+    plot_tree(h, filled=True)
+    plt.show()
+    """""
 
     # # All plots required for this assignment were made here:
     # # BMI histogram
