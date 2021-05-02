@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,36 +17,26 @@ def convertToNumerical(train):
     bloodTypes = pd.Series(train.BloodType).unique()
     count = 0
     for i in bloodTypes:
-        train.BloodType.replace(to_replace=i, value=count, inplace=True)
+        train.BloodType.replace(to_replace=i, value=float(count), inplace=True)
         count += 1
-    train.Sex.replace(to_replace="F", value=1, inplace=True)
-    train.Sex.replace(to_replace="M", value=0, inplace=True)
-
+    train.Sex.replace(to_replace="F", value=float(1), inplace=True)
+    train.Sex.replace(to_replace="M", value=float(0), inplace=True)
     viruses = pd.Series(train.Virus).unique()
     count = 0
     for i in viruses:
-        train.Virus.replace(to_replace=i, value=count, inplace=True)
+        train.Virus.replace(to_replace=i, value=float(count), inplace=True)
         count += 1
     risks = pd.Series(train.Risk).unique()
     count = 0
     for i in risks:
-        train.Risk.replace(to_replace=i, value=count, inplace=True)
+        train.Risk.replace(to_replace=i, value=float(count), inplace=True)
         count += 1
     spreadLevels = pd.Series(train.SpreadLevel).unique()
     count = 0
     for i in spreadLevels:
-        train.SpreadLevel.replace(to_replace=i, value=count, inplace=True)
+        train.SpreadLevel.replace(to_replace=i, value=float(count), inplace=True)
         count += 1
-
-    # print(train.info())
-    # train.Sex = train.Sex.astype('float64')
-    # print(train.info())
-    # train.Sex = train.Sex.astype('float64')
-    # print(dataset.info())
-    # pd.to_numeric(train.Sex, errors='coerce')
-    # print(dataset.info())
-    # train.Sex = train.Sex.astype('int64')
-    # train.BloodType = dataset.BloodType.astype('category')
+    return train
 
 
 def remove_outliers(data, columns):
@@ -54,9 +46,8 @@ def remove_outliers(data, columns):
         if isinstance(data[columns[i]][0], str):
             pass
         else:
-            if (columns[i] != "DateOfPCRTest"):
-                npdata = np.asarray(data[columns[i]])
-                b = stats.zscore(npdata)
+            npdata = np.asarray(data[columns[i]])
+            b = stats.zscore(npdata)
                 # if columns[i]=='BMI':
                 #     plt.figure(figsize=(20, 20))
                 #     BMI_boxplot = pd.DataFrame(b, columns=['BMI'])
@@ -64,8 +55,8 @@ def remove_outliers(data, columns):
                 #     plt.title('BMI Box Plot after z-score Transformation')
                 #     plt.savefig('BMI_boxplot2.jpg', bbox_inches='tight')
                 #     plt.close()
-                data[columns[i]] = b  # remove this line for generating graphs
-                x = ((np.absolute(b) >= 3) | x)
+            data[columns[i]] = b  # remove this line for generating graphs
+            x = ((np.absolute(b) >= 3) | x)
     afterDrop = data[(x == False)]
 
     # plt.figure(figsize=(20, 20))
@@ -88,12 +79,6 @@ def replace_to_mean(data):
         new_data = data.fillna(data.mean())
     else:
         new_data = data.fillna(data.mode()[0])
-        # numeric_temp = range(len(temp))
-
-        # for i in range(len(data)):
-        #     if data[i].isnull() == False:
-        #         new_data[i] = numeric_temp[temp == data[i]]
-        #     new_data = new_data.fillna(new_data.mean())
     return new_data
 
 
@@ -134,11 +119,12 @@ if __name__ == '__main__':
     # Before changing, we'd like to see the data in graphs for quick and efficient decisions
 
     # TODO write all types in the table and explanations why add split function
-    print(dataset.info())  # to properly evaluate the types we'd like to see the data information
+    #print(dataset.info())  # to properly evaluate the types we'd like to see the data information
     dataset.Address = dataset.Address.astype('string')
     # dataset.AgeGroup = dataset.AgeGroup.astype('category')
     # dataset.BloodType = dataset.BloodType.astype('category')
     dataset.DateOfPCRTest = dataset.DateOfPCRTest.astype('datetime64')
+
     dataset.Job = dataset.Job.astype('string')
     # dataset.NrCousins = dataset.NrCousins.astype('category')
     # dataset.Sex = dataset.Sex.astype('category')
@@ -153,7 +139,13 @@ if __name__ == '__main__':
     # Part 2.5: already done in Part 1.3
 
     # Part 2.6: discussion is in the attached file
-    train.X, train.Y = split_in_XY(train.CurrentLocation)
+
+    x_orig, y_orig = split_in_XY(train.CurrentLocation)
+    X = x_orig.copy()
+    Y = y_orig.copy()
+    train['X'] = X
+    train['Y'] = Y
+
     train.Virus = train.Virus.astype('object')
     train.Virus[(train.Virus == 'covid')] = '1'
     train.Virus[(train.Virus != '1')] = '0'
@@ -213,6 +205,7 @@ if __name__ == '__main__':
     # g8.ax_joint.grid()
     # plt.show()
     #
+
     # g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
     # g9.ax_joint.grid()
     # # plt.savefig('Socialvssports_noOutliers.jpg', bbox_inches='tight')
@@ -237,13 +230,18 @@ if __name__ == '__main__':
     # First, we'd like to change the data into numeric data for easier handling and later modelling.
     col = list(train)
 
+
     for i in (range(len(col))):
         if col[i] == 'DateOfPCRTest':
             DateOfBase = train.DateOfPCRTest
             minDate = DateOfBase.min()
             avg_date = (minDate + (DateOfBase - minDate).mean())
             train.DateOfPCRTest = train.DateOfPCRTest.fillna(avg_date)
-
+            for i in train.DateOfPCRTest:
+                train.DateOfPCRTest.replace(to_replace=i, value=(i-minDate).days, inplace=True)
+            npdata = np.asarray(train.DateOfPCRTest)
+            b = stats.zscore(npdata)
+            train.DateOfPCRTest= b
         else:
             train[col[i]] = replace_to_mean(train[col[i]])
 
@@ -261,27 +259,31 @@ if __name__ == '__main__':
     plt.savefig('StepsHistogram.png', bbox_inches='tight')
     plt.close()
 
+
+
     # Part 2.10
 
     train = remove_outliers(train, col)
-    print(train.info())
+    #print(train.info())
 
-    # train= convertToNumerical(train)
+
 
     # Part 13:
 
     # all corralations matrix
-    # plt.rc('xtick', labelsize=20)
-    # plt.rc('ytick', labelsize=20)
-    # corrMatrix = train.corr()
-    # plt.figure(figsize=(20, 20))
-    # ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
-    # plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-    #          rotation_mode="anchor")
-    # # plt.show()
-    # plt.savefig('correlation_matrix.jpg', bbox_inches='tight')
+    """""
+    plt.rc('xtick', labelsize=20)
+    plt.rc('ytick', labelsize=20)
+    corrMatrix = train.corr()
+    plt.figure(figsize=(20, 20))
+    ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+    plt.show()
+    plt.savefig('correlation_matrix.jpg', bbox_inches='tight')
+    """""
 
-    # # testing two features . checking if we can drop one of them
+    # testing two features . checking if we can drop one of them
     # g1 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HappinessScore", hue="Virus")
     # plt.show()
     #
@@ -290,7 +292,7 @@ if __name__ == '__main__':
     #
     # g3 = sns.jointplot(data=train, x="AgeGroup", y="StepsPerYear", hue="Virus")
     # plt.savefig('agegroupVSsteps.jpg', bbox_inches='tight')
-
+    #
     # g4 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HouseholdExpenseOnPresents", hue="Virus")
     # plt.show()
     #
@@ -302,13 +304,13 @@ if __name__ == '__main__':
     #
     # g7 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
     # plt.show()
-    #
+
     # g8 = sns.jointplot(data=train, x="SportsPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
     # plt.show()
-    #
-    # g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
-    # plt.show()
-    #
+
+    g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
+    plt.show()
+
     g10_2 = sns.jointplot(data=train, x="StudingPerDay", y="HouseholdExpenseParkingTicketsPerYear")
     g10_2.ax_joint.grid()
     g10_2.fig.tight_layout()
@@ -318,16 +320,48 @@ if __name__ == '__main__':
     plt.close()
     # plt.show()
 
-    # X_train = train.iloc[:,[0, 33]]
-    # Y_train = train.Virus
-    # h = DecisionTreeClassifier(criterion="entropy", max_depth=5)
-    # h.fit(X_train, Y_train)
-    # # plt.figure(figsize=(6, 6))
-    # # plot_tree(h, filled=True)
-    # fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), dpi=130)
+    train = train.drop(['Self_declaration_of_Illness_Form'], axis=1) #TODO: remove this line
+    train = convertToNumerical(train)
+    print(train.info())
+    indexes = list(range(0, 33))
+    indexes.append(36)
+    indexes.append(37)
+
+    """"" ID3 for Virus target label
+    X_train = train.iloc[:,indexes]
+    Y_train = train.Virus
+    h = DecisionTreeClassifier(criterion="entropy", max_depth=15)
+    h.fit(X_train, Y_train)
+    # plt.figure(figsize=(6, 6))
     # plot_tree(h, filled=True)
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), dpi=130)
+    plot_tree(h, filled=True)
+    plt.show()
+    """""
     #
-    # plt.show()
+    """"" ID3 for SpreadLevel target label
+    X_train = train.iloc[:,indexes]
+    Y_train = train.SpreadLevel
+    h = DecisionTreeClassifier(criterion="entropy", max_depth=15)
+    h.fit(X_train, Y_train)
+    # plt.figure(figsize=(6, 6))
+    # plot_tree(h, filled=True)
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), dpi=130)
+    plot_tree(h, filled=True)
+    plt.show()
+ """""
+
+    """"" ID3 for Risk target label
+    X_train = train.iloc[:,indexes]
+    Y_train = train.Risk
+    h = DecisionTreeClassifier(criterion="entropy", max_depth=15)
+    h.fit(X_train, Y_train)
+    # plt.figure(figsize=(6, 6))
+    # plot_tree(h, filled=True)
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), dpi=130)
+    plot_tree(h, filled=True)
+    plt.show()
+    """""
 
     # # All plots required for this assignment were made here:
     # # BMI histogram
