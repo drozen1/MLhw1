@@ -249,11 +249,17 @@ if __name__ == '__main__':
 
     # Part 2.9
 
-    plt.figure(figsize=(20, 20))
-    BMI_boxplot = pd.DataFrame(train.BMI, columns=['BMI'])
+    # plt.figure(figsize=(20, 20))
+    BMI_boxplot = pd.DataFrame(train.StepsPerYear, columns=['StepsPerYear'])
     BMI_boxplot.plot.box(grid='True')
-    plt.title('BMI Box Plot')
-    plt.savefig('BMI_boxplot.jpg', bbox_inches='tight')
+    plt.title('Steps Per Year Box Plot')
+    plt.savefig('Steps_boxplot.jpg', bbox_inches='tight')
+    plt.close()
+    sns.histplot(train.StepsPerYear, bins=10, kde=True)
+    plt.grid()
+    plt.suptitle('Steps Per Year Distribution')
+    plt.savefig('StepsHistogram.png', bbox_inches='tight')
+    plt.close()
 
     # Part 2.10
 
