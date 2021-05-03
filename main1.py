@@ -97,13 +97,39 @@ def isNaN(string):
     return string != string
 
 
+def generating_CSV_files(dataset,datasetSelected):
+    orig_train, test_temp = train_test_split(dataset, test_size=0.4, random_state=14)
+    orig_test, orig_validate = train_test_split(test_temp, test_size=0.5, random_state=14)
+    orig_train.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\orig_train.csv')
+    orig_validate.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\orig_validate.csv')
+    orig_test.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\orig_test.csv')
+
+    selected_feature = [1,2,4,7,8,10]+list(range(12,28))+[29,31,32,36,37]
+    selected_feature_names = []
+    count=0
+    for i in datasetSelected:
+        print(count,": ",i)
+        if count in selected_feature:
+            selected_feature_names.append(i)
+        count+=1
+    selected_feature_names.append("Low_appetite")
+    selected_feature_names.append("Nausea_or_vomiting")
+    selected_feature_names.append("New_loss_of_taste_or_smell")
+    datasetSelected=datasetSelected[selected_feature_names]
+    selected_train, test_temp = train_test_split(datasetSelected, test_size=0.4, random_state=14)
+    selected_test, selected_validate = train_test_split(test_temp, test_size=0.5, random_state=14)
+    selected_train.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\selected_train.csv')
+    selected_test.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\selected_test.csv')
+    selected_validate.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\selected_validate.csv')
+
+
 if __name__ == '__main__':
 
     # Part 1.1 - importing the data
     filename = 'virus_hw1.csv'
     dataset = pd.read_csv(filename)
     datasetCopy = dataset.copy()
-
+    datasetSelected = dataset.copy()
 
 
     # Part 1.3: changing to the correct type
@@ -113,6 +139,7 @@ if __name__ == '__main__':
     # dataset.AgeGroup = dataset.AgeGroup.astype('category')
     # dataset.BloodType = dataset.BloodType.astype('category')
     dataset.DateOfPCRTest = dataset.DateOfPCRTest.astype('datetime64')
+    datasetSelected.DateOfPCRTest = datasetSelected.DateOfPCRTest.astype('datetime64')
     dataset.Job = dataset.Job.astype('string')
     # dataset.NrCousins = dataset.NrCousins.astype('category')
     # dataset.Sex = dataset.Sex.astype('category')
@@ -134,6 +161,12 @@ if __name__ == '__main__':
     train['X'] = X
     train['Y'] = Y
 
+    x_orig, y_orig = split_in_XY(datasetSelected.CurrentLocation)
+    X = x_orig.copy()
+    Y = y_orig.copy()
+    datasetSelected['X'] = X
+    datasetSelected['Y'] = Y
+
     # splitting Self_declaration_of_Illness_Form for future use:
     illness_types = set()
     col_Illness_Form = train.Self_declaration_of_Illness_Form.copy()
@@ -154,6 +187,19 @@ if __name__ == '__main__':
     train.Virus = train.Virus.astype('object')
     train.Virus[(train.Virus == 'covid')] = '1'
     train.Virus[(train.Virus != '1')] = '0'
+
+    for i in illness_types:
+        datasetSelected[i] = datasetSelected.Self_declaration_of_Illness_Form.copy()
+    for i in illness_types:
+        txt = i + "+"
+        regex_pat = re.compile(txt)
+        datasetSelected[i].replace(to_replace=regex_pat, value=float(1), inplace=True, regex=True)
+        datasetSelected[i][(datasetSelected[i] != float(1))] = '0'
+        datasetSelected[i] = train[i].astype('float64')
+    datasetSelected = datasetSelected.drop(['Self_declaration_of_Illness_Form'], axis=1)
+    datasetSelected.Virus = datasetSelected.Virus.astype('object')
+    datasetSelected.Virus[(datasetSelected.Virus == 'covid')] = '1'
+    datasetSelected.Virus[(datasetSelected.Virus != '1')] = '0'
     # train.Virus = train.Virus.astype('category')
 
     # We are keeping the following line of code in case diffrentiating between not covid and other illnesses is important:
@@ -164,12 +210,12 @@ if __name__ == '__main__':
 
     # removing data as discussed in attached file
     train = train.drop(['ID', 'Address', 'CurrentLocation', 'Job'], axis=1)
-
+    datasetSelected = datasetSelected.drop(['ID', 'Address', 'CurrentLocation', 'Job'], axis=1)
     # Part 2.7: discussion is in the attached file
     # we'd like to find the amount of missing data in each feature:
     NAN_checker(train)
     train = train.drop(['PCR_11', 'PCR_15'], axis=1)
-
+    datasetSelected=datasetSelected.drop(['PCR_11', 'PCR_15'], axis=1)
     # checking how many jobs we have
     job_col = dataset.Job
     unique_jobs = job_col.unique()
@@ -276,6 +322,22 @@ if __name__ == '__main__':
             train.DateOfPCRTest= b
         else:
             train[col[i]] = replace_to_mean(train[col[i]])
+
+
+    col = list(datasetSelected)
+    for i in (range(len(col))):
+        if col[i] == 'DateOfPCRTest':
+            DateOfBase = datasetSelected.DateOfPCRTest
+            minDate = DateOfBase.min()
+            avg_date = (minDate + (DateOfBase - minDate).mean())
+            datasetSelected.DateOfPCRTest = datasetSelected.DateOfPCRTest.fillna(avg_date)
+            for i in datasetSelected.DateOfPCRTest:
+                datasetSelected.DateOfPCRTest.replace(to_replace=i, value=(i - minDate).days, inplace=True)
+            npdata = np.asarray(datasetSelected.DateOfPCRTest)
+            b = stats.zscore(npdata)
+            datasetSelected.DateOfPCRTest = b
+        else:
+            datasetSelected[col[i]] = replace_to_mean(datasetSelected[col[i]])
 
     # Part 2.9
 
@@ -436,7 +498,7 @@ if __name__ == '__main__':
     plt.show()
     """""
 
-    # Part 13:
+    # Part 3.13:
 
     # all corralations matrix
     # chosen features:
@@ -469,3 +531,7 @@ if __name__ == '__main__':
     plt.grid()
     plt.savefig('Bloodtype_histogram.png')
     plt.close()
+
+    # Part 3.16:
+
+    generating_CSV_files(datasetCopy,datasetSelected)
