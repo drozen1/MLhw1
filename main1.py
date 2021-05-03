@@ -88,10 +88,10 @@ def NAN_checker(data):
     columns = list(check_null)
     percentNAN = [0] * len(columns)
     for i in (range(len(columns))):
-        print(columns[i])
+        # print(columns[i])
         check_null_col = check_null[columns[i]]
         percentNAN[i] = 100 * check_null_col.value_counts(normalize=True)
-        print(percentNAN[i])
+        # print(percentNAN[i])
 
 def isNaN(string):
     return string != string
@@ -103,6 +103,8 @@ if __name__ == '__main__':
     filename = 'virus_hw1.csv'
     dataset = pd.read_csv(filename)
     datasetCopy = dataset.copy()
+
+
 
     # Part 1.3: changing to the correct type
     # Before changing, we'd like to see the data in graphs for quick and efficient decisions. That's why there is some lines in comment
@@ -132,7 +134,7 @@ if __name__ == '__main__':
     train['X'] = X
     train['Y'] = Y
 
-    # splitting Self_declaration_of_Illness_Form for next use:
+    # splitting Self_declaration_of_Illness_Form for future use:
     illness_types = set()
     col_Illness_Form = train.Self_declaration_of_Illness_Form.copy()
     for i in col_Illness_Form:
@@ -167,6 +169,10 @@ if __name__ == '__main__':
     # we'd like to find the amount of missing data in each feature:
     NAN_checker(train)
     train = train.drop(['PCR_11', 'PCR_15'], axis=1)
+
+    # checking how many jobs we have
+    job_col = dataset.Job
+    unique_jobs = job_col.unique()
 
     #This is for part 13, we'd like to see plots before filling missing data. Explanations is in the attached file.
 
@@ -290,39 +296,6 @@ if __name__ == '__main__':
 
     train = remove_outliers(train, col)
 
-    # Part 13:
-    """""
-    # all corralations matrix
-    
-    plt.rc('xtick', labelsize=20)
-    plt.rc('ytick', labelsize=20)
-    corrMatrix = train.corr()
-    plt.figure(figsize=(20, 20))
-    ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-             rotation_mode="anchor")
-    plt.show()
-    plt.savefig('correlation_matrix.jpg', bbox_inches='tight')
-    """""
-
-    # Illness types corralations matrix
-    """""
-    illness_types = list(illness_types)
-    train["Virus"] = train["Virus"].astype('float64')
-    illness_types.append("Virus")
-    illness_types.append("SpreadLevel")
-    illness_types.append("Risk")
-    illness_df = train[illness_types]
-    plt.rc('xtick', labelsize=20)
-    plt.rc('ytick', labelsize=20)
-    corrMatrix = illness_df.corr()
-    plt.figure(figsize=(20, 20))
-    ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-             rotation_mode="anchor")
-    plt.show()
-    plt.savefig('correlation_matrix.jpg', bbox_inches='tight')
-    """""
 
     # testing two features . checking if we can drop one of them TODO: Is it duplication or do we need it?
     # g1 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HappinessScore", hue="Virus")
@@ -364,13 +337,65 @@ if __name__ == '__main__':
     # Part 3.12
     train = convertToNumerical(train)
 
-    # chosen features: #TODO: edit it
-    indexes = list(range(0, 33))
-    indexes.append(36)
-    indexes.append(37)
-    indexes.append(38)
-    indexes.append(40)
-    indexes.append(47)
+    # fig = plt.figure()
+    # ax1 = fig.add_subplot(111)
+    #
+    # ax1.scatter(train.X, train.Virus, s=10, c='b', marker="s", label='first')
+    # ax1.scatter(train.Y, train.Virus, s=10, c='r', marker="o", label='second')
+    # plt.legend(loc='upper left')
+    # plt.show()
+    #
+    # plt.scatter(train.DateOfPCRTest, train.Virus)
+    # plt.show()
+    # plt.scatter(train.StepsPerYear, train.Virus)
+    # plt.show()
+    # plt.scatter(train.PCR_95, train.Virus)
+    # plt.show()
+    # plt.scatter(train.PCR_10, train.Virus)
+    # plt.show()
+    # plt.scatter(train.X, train.Virus)
+    # plt.show()
+    # plt.scatter(train.Y, train.Virus)
+    # plt.show()
+    #
+    # plt.scatter(train.DateOfPCRTest, train.Risk)
+    # plt.show()
+    # plt.scatter(train.StepsPerYear, train.Risk)
+    # plt.show()
+    # plt.scatter(train.PCR_95, train.Risk)
+    # plt.show()
+    # plt.scatter(train.PCR_10, train.Risk)
+    # plt.show()
+    #
+    # plt.scatter(train.DateOfPCRTest, train.SpreadLevel)
+    # plt.show()
+    # plt.scatter(train.StepsPerYear, train.SpreadLevel)
+    # plt.show()
+    # plt.scatter(train.PCR_95, train.SpreadLevel)
+    # plt.show()
+    # plt.scatter(train.PCR_10, train.SpreadLevel)
+    # plt.show()
+
+    # Part 3.13
+    # Illness types corralations matrix:
+    """""
+    illness_types = list(illness_types)
+    train["Virus"] = train["Virus"].astype('float64')
+    illness_types.append("Virus")
+    illness_types.append("SpreadLevel")
+    illness_types.append("Risk")
+    illness_df = train[illness_types]
+    plt.rc('xtick', labelsize=20)
+    plt.rc('ytick', labelsize=20)
+    corrMatrix = illness_df.corr()
+    plt.figure(figsize=(20, 20))
+    plt.title('Symptoms Correlation Map', fontsize=20)
+    ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+    # plt.show()
+    plt.savefig('correlation_matrix2.jpg', bbox_inches='tight')
+    """""
 
     # ID3 for Virus target label
     """""
@@ -411,6 +436,25 @@ if __name__ == '__main__':
     plt.show()
     """""
 
+    # Part 13:
+
+    # all corralations matrix
+    # chosen features:
+    indexes = list(range(0, 38))
+    indexes.append(38)
+    indexes.append(45)
+    indexes.append(49)
+
+    """""
+    plt.rc('xtick', labelsize=20)
+    plt.rc('ytick', labelsize=20)
+    corrMatrix = train.corr()
+    plt.figure(figsize=(20, 20))
+    plt.title('Final Correlation Map', fontsize=20)
+    ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
+    plt.show()
+    # plt.savefig('correlation_matrix.jpg', bbox_inches='tight')
+     """""
     # # All plots required for this assignment were made here: #TODO: is this still relevant?
     # # BMI histogram
     # sns.histplot(train.BMI, bins=100, kde=True)
@@ -418,10 +462,10 @@ if __name__ == '__main__':
     # plt.savefig('BMI_histogram.png')
     # plt.close()
     #
-    # # Blood type bins:
+    # Blood type bins:
     # datasetCopy.Virus[(datasetCopy.Virus != 'covid') & (datasetCopy.Virus != 'not_detected')] = 'other'
-    # BloodType_plot = pd.crosstab([datasetCopy.BloodType], datasetCopy.Virus)
-    # BloodType_plot.plot(kind='bar', stacked=True, color=['red', 'blue', 'green'], grid=True)
-    # plt.grid()
-    # plt.savefig('Bloodtype_histogram.png')
-    # plt.close()
+    BloodType_plot = pd.crosstab([train.BloodType], train.Virus)
+    BloodType_plot.plot(kind='bar', stacked=True, color=['red', 'blue'], grid=True)
+    plt.grid()
+    plt.savefig('Bloodtype_histogram.png')
+    plt.close()
