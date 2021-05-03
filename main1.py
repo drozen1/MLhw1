@@ -88,10 +88,10 @@ def NAN_checker(data):
     columns = list(check_null)
     percentNAN = [0] * len(columns)
     for i in (range(len(columns))):
-        print(columns[i])
+        # print(columns[i])
         check_null_col = check_null[columns[i]]
         percentNAN[i] = 100 * check_null_col.value_counts(normalize=True)
-        print(percentNAN[i])
+        # print(percentNAN[i])
 
 def isNaN(string):
     return string != string
@@ -377,8 +377,8 @@ if __name__ == '__main__':
     # plt.show()
 
     # Part 3.13
-    # Illness types corralations matrix
-    # """""
+    # Illness types corralations matrix:
+    """""
     illness_types = list(illness_types)
     train["Virus"] = train["Virus"].astype('float64')
     illness_types.append("Virus")
@@ -395,7 +395,7 @@ if __name__ == '__main__':
              rotation_mode="anchor")
     # plt.show()
     plt.savefig('correlation_matrix2.jpg', bbox_inches='tight')
-    # """""
+    """""
 
     # ID3 for Virus target label
     """""
@@ -437,7 +437,7 @@ if __name__ == '__main__':
     """""
 
     # Part 13:
-    # """""
+
     # all corralations matrix
     # chosen features:
     indexes = list(range(0, 38))
@@ -445,6 +445,7 @@ if __name__ == '__main__':
     indexes.append(45)
     indexes.append(49)
 
+    """""
     plt.rc('xtick', labelsize=20)
     plt.rc('ytick', labelsize=20)
     corrMatrix = train.corr()
@@ -453,7 +454,7 @@ if __name__ == '__main__':
     ax = sns.heatmap(corrMatrix, xticklabels=True, yticklabels=True, annot=True)
     plt.show()
     # plt.savefig('correlation_matrix.jpg', bbox_inches='tight')
-    # """""
+     """""
     # # All plots required for this assignment were made here: #TODO: is this still relevant?
     # # BMI histogram
     # sns.histplot(train.BMI, bins=100, kde=True)
