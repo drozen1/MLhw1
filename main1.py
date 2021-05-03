@@ -104,6 +104,8 @@ if __name__ == '__main__':
     dataset = pd.read_csv(filename)
     datasetCopy = dataset.copy()
 
+
+
     # Part 1.3: changing to the correct type
     # Before changing, we'd like to see the data in graphs for quick and efficient decisions. That's why there is some lines in comment
     #print(dataset.info())  # to properly evaluate the types we'd like to see the data information
@@ -167,6 +169,10 @@ if __name__ == '__main__':
     # we'd like to find the amount of missing data in each feature:
     NAN_checker(train)
     train = train.drop(['PCR_11', 'PCR_15'], axis=1)
+
+    # checking how many jobs we have
+    job_col = dataset.Job
+    unique_jobs = job_col.unique()
 
     #This is for part 13, we'd like to see plots before filling missing data. Explanations is in the attached file.
 
