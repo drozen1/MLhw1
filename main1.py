@@ -134,7 +134,7 @@ if __name__ == '__main__':
     train['X'] = X
     train['Y'] = Y
 
-    # splitting Self_declaration_of_Illness_Form for next use:
+    # splitting Self_declaration_of_Illness_Form for future use:
     illness_types = set()
     col_Illness_Form = train.Self_declaration_of_Illness_Form.copy()
     for i in col_Illness_Form:
