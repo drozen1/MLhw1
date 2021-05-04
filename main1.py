@@ -14,7 +14,8 @@ import re
 
 warnings.filterwarnings('ignore')
 
-#function for convert some features to numeric values
+
+# function for convert some features to numeric values
 def convertToNumerical(train):
     bloodTypes = pd.Series(train.BloodType).unique()
     count = 0
@@ -40,7 +41,8 @@ def convertToNumerical(train):
         count += 1
     return train
 
-#function for remove outliers
+
+# function for remove outliers
 def remove_outliers(data, columns):
     x = np.zeros(data.shape[0], dtype=bool)
     for i in (range(len(columns))):
@@ -82,6 +84,7 @@ def split_in_XY(data):
             dataY.insert(len(dataY), float(i.split("Decimal")[2][2:-4]))
     return pd.Series(dataX), pd.Series(dataY)
 
+
 # function for checking amount of NANs in columns
 def NAN_checker(data):
     check_null = data.isnull()
@@ -93,29 +96,25 @@ def NAN_checker(data):
         percentNAN[i] = 100 * check_null_col.value_counts(normalize=True)
         # print(percentNAN[i])
 
+
 def isNaN(string):
     return string != string
 
 
-def generating_CSV_files(dataset,datasetSelected):
+def generating_CSV_files(dataset, datasetSelected):
     orig_train, test_temp = train_test_split(dataset, test_size=0.4, random_state=14)
     orig_test, orig_validate = train_test_split(test_temp, test_size=0.5, random_state=14)
     orig_train.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\orig_train.csv')
     orig_validate.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\orig_validate.csv')
     orig_test.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\orig_test.csv')
-
-    selected_feature = [1,2,4,7,8,10]+list(range(12,28))+[29,31,32,36,37]
+    selected_feature = [1, 4, 7, 8, 10, 12, 13, 14, 16, 18, 19, 21, 23, 24, 25, 26, 27, 29, 31, 32, 36, 37]
     selected_feature_names = []
-    count=0
+    count = 0
     for i in datasetSelected:
-        print(count,": ",i)
         if count in selected_feature:
             selected_feature_names.append(i)
-        count+=1
-    selected_feature_names.append("Low_appetite")
-    selected_feature_names.append("Nausea_or_vomiting")
-    selected_feature_names.append("New_loss_of_taste_or_smell")
-    datasetSelected=datasetSelected[selected_feature_names]
+        count += 1
+    datasetSelected = datasetSelected[selected_feature_names]
     selected_train, test_temp = train_test_split(datasetSelected, test_size=0.4, random_state=14)
     selected_test, selected_validate = train_test_split(test_temp, test_size=0.5, random_state=14)
     selected_train.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\selected_train.csv')
@@ -131,10 +130,9 @@ if __name__ == '__main__':
     datasetCopy = dataset.copy()
     datasetSelected = dataset.copy()
 
-
     # Part 1.3: changing to the correct type
     # Before changing, we'd like to see the data in graphs for quick and efficient decisions. That's why there is some lines in comment
-    #print(dataset.info())  # to properly evaluate the types we'd like to see the data information
+    # print(dataset.info())  # to properly evaluate the types we'd like to see the data information
     dataset.Address = dataset.Address.astype('string')
     # dataset.AgeGroup = dataset.AgeGroup.astype('category')
     # dataset.BloodType = dataset.BloodType.astype('category')
@@ -178,11 +176,11 @@ if __name__ == '__main__':
     for i in illness_types:
         train[i] = train.Self_declaration_of_Illness_Form.copy()
     for i in illness_types:
-        txt = i+"+"
+        txt = i + "+"
         regex_pat = re.compile(txt)
         train[i].replace(to_replace=regex_pat, value=float(1), inplace=True, regex=True)
         train[i][(train[i] != float(1))] = '0'
-        train[i] =train[i].astype('float64')
+        train[i] = train[i].astype('float64')
     train = train.drop(['Self_declaration_of_Illness_Form'], axis=1)
     train.Virus = train.Virus.astype('object')
     train.Virus[(train.Virus == 'covid')] = '1'
@@ -215,12 +213,12 @@ if __name__ == '__main__':
     # we'd like to find the amount of missing data in each feature:
     NAN_checker(train)
     train = train.drop(['PCR_11', 'PCR_15'], axis=1)
-    datasetSelected=datasetSelected.drop(['PCR_11', 'PCR_15'], axis=1)
+    datasetSelected = datasetSelected.drop(['PCR_11', 'PCR_15'], axis=1)
     # checking how many jobs we have
     job_col = dataset.Job
     unique_jobs = job_col.unique()
 
-    #This is for part 13, we'd like to see plots before filling missing data. Explanations is in the attached file.
+    # This is for part 13, we'd like to see plots before filling missing data. Explanations is in the attached file.
 
     """""
     plt.rc('xtick', labelsize=20)
@@ -316,13 +314,12 @@ if __name__ == '__main__':
             avg_date = (minDate + (DateOfBase - minDate).mean())
             train.DateOfPCRTest = train.DateOfPCRTest.fillna(avg_date)
             for i in train.DateOfPCRTest:
-                train.DateOfPCRTest.replace(to_replace=i, value=(i-minDate).days, inplace=True)
+                train.DateOfPCRTest.replace(to_replace=i, value=(i - minDate).days, inplace=True)
             npdata = np.asarray(train.DateOfPCRTest)
             b = stats.zscore(npdata)
-            train.DateOfPCRTest= b
+            train.DateOfPCRTest = b
         else:
             train[col[i]] = replace_to_mean(train[col[i]])
-
 
     col = list(datasetSelected)
     for i in (range(len(col))):
@@ -358,7 +355,6 @@ if __name__ == '__main__':
 
     train = remove_outliers(train, col)
 
-
     # testing two features . checking if we can drop one of them TODO: Is it duplication or do we need it?
     # g1 = sns.jointplot(data=train, x="ConversatiosPerDay", y="HappinessScore", hue="Virus")
     # plt.show()
@@ -384,8 +380,8 @@ if __name__ == '__main__':
     # g8 = sns.jointplot(data=train, x="SportsPerDay", y="HouseholdExpenseOnSocialGames", hue="Virus")
     # plt.show()
 
-    #g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
-    #plt.show()
+    # g9 = sns.jointplot(data=train, x="SocialActivitiesPerDay", y="SportsPerDay", hue="Virus")
+    # plt.show()
 
     # g10_2 = sns.jointplot(data=train, x="StudingPerDay", y="HouseholdExpenseParkingTicketsPerYear")
     # g10_2.ax_joint.grid()
@@ -472,7 +468,7 @@ if __name__ == '__main__':
     plt.show()
     """""
 
-    #ID3 for SpreadLevel target label
+    # ID3 for SpreadLevel target label
     """""
     X_train = train.iloc[:,indexes]
     Y_train = train.SpreadLevel
@@ -534,4 +530,4 @@ if __name__ == '__main__':
 
     # Part 3.16:
 
-    generating_CSV_files(datasetCopy,datasetSelected)
+    #generating_CSV_files(datasetCopy, datasetSelected)
