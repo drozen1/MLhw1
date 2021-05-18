@@ -107,7 +107,8 @@ def generating_CSV_files(dataset, datasetSelected):
     orig_train.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\orig_train.csv')
     orig_validate.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\orig_validate.csv')
     orig_test.to_csv(r'C:\Users\dor\PycharmProjects\MLhw1\orig_test.csv')
-    selected_feature = [1, 4, 7, 8, 10, 12, 13, 14, 16, 18, 19, 21, 23, 24, 25, 26, 27, 29, 31, 32, 36, 37]
+    selected_feature = [1, 4, 7, 8, 10, 12, 13, 14, 16, 18, 19, 21, 23, 24, 25, 26, 27, 29, 31, 32,33,34,35, 36, 37]
+    print(datasetSelected.info())
     selected_feature_names = []
     count = 0
     for i in datasetSelected:
